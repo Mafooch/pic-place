@@ -46,4 +46,15 @@ class Place
     docs = collection.find.skip(offset).limit(limit)
     docs.map { |doc| Place.new doc }
   end
+
+  def self.get_address_components sort = { _id: 1 }, offset = 0, limit = 10000
+    # TODO There must be a better way to do this than hardcode the limit
+    collection.find
+      .aggregate([{ :$unwind => "$address_components" },
+                  { :$project => { address_components: 1, formatted_address: 1, "geometry.geolocation": 1 } },
+                  { :$sort => sort },
+                  { :$skip => offset },
+                  { :$limit => limit }
+                  ])
+  end
 end
