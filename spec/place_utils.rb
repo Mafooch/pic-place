@@ -1,6 +1,6 @@
 module Place_utils
 
-    def address_component_equal?(ac1, ac2) 
+    def address_component_equal?(ac1, ac2)
       if (ac1.long_name != ac2.long_name)
         return false
       elsif(ac1.short_name != ac2.short_name)
@@ -17,8 +17,8 @@ module Place_utils
       return true
     end
 
-    def contains_address_component?(arr, ac) 
-      arr.each { |ac0| 
+    def contains_address_component?(arr, ac)
+      arr.each { |ac0|
         if (address_component_equal?(ac0, ac))
           return true
         end
@@ -27,7 +27,7 @@ module Place_utils
     end
 
     def address_component_match?(arr, field, value)
-      arr.each { |ac| 
+      arr.each { |ac|
         if (ac[field] == value)
           return true
         end

@@ -14,8 +14,8 @@ feature "Module #3 Setup and Collection Tests" do
 
     around :each do |example|
         if $continue
-            $continue = false 
-            example.run 
+            $continue = false
+            example.run
             $continue = true unless example.exception
         else
             example.skip
@@ -26,7 +26,7 @@ feature "Module #3 Setup and Collection Tests" do
       it "must have top level structure of a rails application" do
         expect(File.exists?("Gemfile")).to be(true)
         expect(Dir.entries(".")).to include("app", "bin", "config", "db", "lib", "public", "log", "test", "vendor")
-        expect(Dir.entries("./app")).to include("assets", "controllers", "helpers", "mailers", "models", "views")        
+        expect(Dir.entries("./app")).to include("assets", "controllers", "helpers", "mailers", "models", "views")
       end
     end
     context "rq01" do # Resuse 'User' model and database table
@@ -50,10 +50,10 @@ feature "Module #3 Setup and Collection Tests" do
         expect(Place).to respond_to(:load_all)
       end
 
-      it "Instance method load_all takes a parameter with JSON string of data" do 
+      it "Instance method load_all takes a parameter with JSON string of data" do
         expect((Place.method(:load_all).parameters.flatten - [:opt, :req]).count).to eq 1
-        expect(Place.method(:load_all).parameters.flatten).to include(:req) 
-        expect(Place.method(:load_all).parameters.flatten).to_not include(:opt) 
+        expect(Place.method(:load_all).parameters.flatten).to include(:req)
+        expect(Place.method(:load_all).parameters.flatten).to_not include(:opt)
       end
 
 
@@ -64,7 +64,7 @@ feature "Module #3 Setup and Collection Tests" do
       end
     end
 
-    context "rq03" do 
+    context "rq03" do
       before :all do
         @lat = 53.82856035
         @lon = -1.8625303
@@ -81,7 +81,7 @@ feature "Module #3 Setup and Collection Tests" do
           expect(@p1.latitude).to eq @lat
           expect(@p1.longitude).to eq @lon
           expect(@p2.latitude).to eq @lat
-          expect(@p2.longitude).to eq @lon   
+          expect(@p2.longitude).to eq @lon
         end
         it "Point class initializer takes a hash of GeoJSON point format or with keys lat and lng" do
           expect((Point.method(:initialize).parameters.flatten - [:req, :opt]).count).to eq 1
@@ -91,14 +91,14 @@ feature "Module #3 Setup and Collection Tests" do
           expect(@p2).to be_a Point
         end
         it "Point class has initialize methods and instance method to_hash to create a GeoJSON point hash" do
-          expect((@p1.method(:to_hash).parameters.flatten - [:req, :opt]).count).to eq 0         
+          expect((@p1.method(:to_hash).parameters.flatten - [:req, :opt]).count).to eq 0
           expect(@p1).to respond_to(:to_hash)
           expect(@p1.to_hash).to_not be_nil
           expect(@p1.to_hash[:type]).to eq 'Point'
           expect(@p1.to_hash[:coordinates][0]).to eq @lon
           expect(@p1.to_hash[:coordinates][1]).to eq @lat
           expect(@p2).to respond_to(:to_hash)
-          expect((@p2.method(:to_hash).parameters.flatten - [:req, :opt]).count).to eq 0                   
+          expect((@p2.method(:to_hash).parameters.flatten - [:req, :opt]).count).to eq 0
           expect(@p2.to_hash).to_not be_nil
           expect(@p2.to_hash[:type]).to eq 'Point'
           expect(@p2.to_hash[:coordinates][0]).to eq @lon
@@ -107,7 +107,7 @@ feature "Module #3 Setup and Collection Tests" do
       end
     end
 
-    context "rq04" do 
+    context "rq04" do
       before :all do
         @ln = "Bradford District"
         @sn = "BD"
@@ -133,18 +133,18 @@ feature "Module #3 Setup and Collection Tests" do
           expect(@ac).to be_a AddressComponent
         end
       end
-    end    
+    end
 
-    context "rq05" do 
+    context "rq05" do
       before :all do
-        @hash = {:_id=>BSON::ObjectId('56521833e301d0284000003d'), 
+        @hash = {:_id=>BSON::ObjectId('56521833e301d0284000003d'),
                  formatted_address:"Wilsden, West Yorkshire, UK",
                  geometry:
                   {
                     location:{lat:53.8256035, lng:-1.8625303},
                     geolocation:{type:"Point", coordinates:[-1.8625303, 53.8256035]}
                   },
-                  address_components: 
+                  address_components:
                   [
                     {long_name:"Wilsden", short_name:"Wilsden",
                      types:["administrative_area_level_4", "political"]},
@@ -161,7 +161,7 @@ feature "Module #3 Setup and Collection Tests" do
           expect(@place).to respond_to(:location)
           expect(@place.id).to eq @hash[:_id].to_s
           expect(@place.formatted_address).to eq @hash[:formatted_address]
-          @hash[:address_components].each { |a| 
+          @hash[:address_components].each { |a|
             ac = AddressComponent.new(a)
             expect(contains_address_component?(@place.address_components, ac)).to be true
           }
@@ -172,5 +172,5 @@ feature "Module #3 Setup and Collection Tests" do
           expect(@place).to be_a Place
         end
       end
-    end    
+    end
   end
