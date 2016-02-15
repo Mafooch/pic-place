@@ -4,6 +4,12 @@ class Place
   end
 
   def self.collection
-    self.mongo_client["places"]
+    mongo_client["places"]
+  end
+
+  def self.load_all file
+    json_string = File.read file
+    json_data = JSON.parse json_string
+    self.collection.insert_many json_data
   end
 end
