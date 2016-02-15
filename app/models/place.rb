@@ -77,4 +77,12 @@ class Place
     ])
     id_array = id_coll.map { |c| c[:_id].to_s }
   end
+
+  def self.create_indexes
+    collection.indexes.create_one({ "geometry.geolocation" => Mongo::Index::GEO2DSPHERE })
+  end
+
+  def self.remove_indexes
+    collection.indexes.drop_one "geometry.geolocation_2dsphere"
+  end
 end
