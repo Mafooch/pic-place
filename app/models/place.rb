@@ -30,4 +30,11 @@ class Place
   def self.to_places mongo_collection_view
     mongo_collection_view.map { |view| Place.new view }
   end
+
+  def self.find id
+    bson_id = BSON::ObjectId.from_string id
+    document = collection.find(_id: bson_id).first
+
+    Place.new document
+  end
 end
