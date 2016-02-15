@@ -9,6 +9,11 @@ class Place
     @address_components = params[:address_components].map { |ac| AddressComponent.new ac }
   end
 
+  def destroy
+    Place.collection.find(_id: BSON::ObjectId.from_string(@id)).delete_one
+    # TODO extract string id to bson away to a module in lib. a util module?
+  end
+
   def self.mongo_client
     Mongoid::Clients.default
   end
@@ -34,7 +39,11 @@ class Place
   def self.find id
     bson_id = BSON::ObjectId.from_string id
     document = collection.find(_id: bson_id).first
+    Place.new document if document
+  end
 
-    Place.new document
+  def self.all offset = 0, limit = 0
+    docs = collection.find.skip(offset).limit(limit)
+    docs.map { |doc| Place.new doc }
   end
 end
