@@ -20,6 +20,13 @@ class Place
     Place.collection.find(_id: BSON::ObjectId.from_string(@id)).delete_one
     # TODO extract string id to bson away to a module in lib. a util module?
   end
+  
+  def near max_meters = nil
+    near_query_hash = { :$near => self.location.to_hash }
+    near_query_hash[:$maxDistance] = max_meters if max_meters
+    docs_near = Place.collection.find "geometry.geolocation" => near_query_hash
+    places_near = Place.to_places docs_near
+  end
 
   def self.mongo_client
     Mongoid::Clients.default
@@ -97,12 +104,5 @@ class Place
     near_query_hash = { :$near => point.to_hash }
     near_query_hash[:$maxDistance] = max_meters if max_meters
     Place.collection.find "geometry.geolocation" => near_query_hash
-  end
-
-  def near max_meters = nil
-    near_query_hash = { :$near => self.location.to_hash }
-    near_query_hash[:$maxDistance] = max_meters if max_meters
-    docs_near = Place.collection.find "geometry.geolocation" => near_query_hash
-    places_near = Place.to_places docs_near
   end
 end
