@@ -85,4 +85,10 @@ class Place
   def self.remove_indexes
     collection.indexes.drop_one "geometry.geolocation_2dsphere"
   end
+
+  def self.near point, max_meters = nil
+    near_query_hash = { :$near => point.to_hash }
+    near_query_hash[:$maxDistance] = max_meters unless max_meters.nil?
+    Place.collection.find("geometry.geolocation" => near_query_hash)
+  end
 end
