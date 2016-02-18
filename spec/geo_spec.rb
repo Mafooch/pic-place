@@ -15,20 +15,20 @@ feature "Module #3 Geolocation Tests" do
 
     around :each do |example|
         if $continue
-            $continue = false 
-            example.run 
+            $continue = false
+            example.run
             $continue = true unless example.exception
         else
             example.skip
         end
     end
 
-    context "rq01" do 
+    context "rq01" do
       it "Place Model has a class method called create_indexes" do
         expect(Place).to respond_to(:create_indexes)
       end
-      
-      it "create_indexes method takes no parameters" do 
+
+      it "create_indexes method takes no parameters" do
         expect((Place.method(:create_indexes).parameters.flatten - [:opt, :req]).count).to eq 0
       end
 
@@ -40,8 +40,8 @@ feature "Module #3 Geolocation Tests" do
       it "Place Model has a class method called remove_indexes" do
         expect(Place).to respond_to(:remove_indexes)
       end
-      
-      it "remove_indexes method takes no parameters" do 
+
+      it "remove_indexes method takes no parameters" do
         expect((Place.method(:remove_indexes).parameters.flatten - [:opt, :req]).count).to eq 0
       end
 
@@ -52,15 +52,15 @@ feature "Module #3 Geolocation Tests" do
       end
     end
 
-    context "rq02" do 
+    context "rq02" do
       it "Place Model has a class method called near" do
         expect(Place).to respond_to(:near)
       end
-      
+
       it "near method takes a required Point and optional max_meters parameter arguments" do
         expect((Place.method(:near).parameters.flatten - [:opt, :req]).count).to eq 2
         expect(Place.method(:near).parameters.flatten).to include(:opt)
-        expect(Place.method(:near).parameters.flatten).to include(:req)      
+        expect(Place.method(:near).parameters.flatten).to include(:req)
       end
 
       it "near returns expected type and result" do
@@ -68,7 +68,7 @@ feature "Module #3 Geolocation Tests" do
         ref_point = {:type=>"Point", :coordinates=>[-76.61666667, 39.33333333]}
         ref_distance = 1069.4 * 1000
         ref_list = []
-        Place.collection.find.each { |p| 
+        Place.collection.find.each { |p|
           if (Geo_utils.distance(p[:geometry][:geolocation], ref_point) <= ref_distance)
             ref_list.push(p)
           end
@@ -76,14 +76,14 @@ feature "Module #3 Geolocation Tests" do
         list_near = Place.near(ref_point, ref_distance)
         expect(list_near).to be_a Mongo::Collection::View
         expect(ref_list.count).to eq list_near.count
-        list_near.each { |l| 
+        list_near.each { |l|
           expect(l).to be_a BSON::Document
           expect(ref_list).to include(l)
-        }  
-      end    
+        }
+      end
     end
 
-    context "rq03" do 
+    context "rq03" do
       before :all do
         @place = Place.new(Place.collection.find.first)
       end
@@ -91,11 +91,11 @@ feature "Module #3 Geolocation Tests" do
       it "Place Model has a instance method called near" do
         expect(@place).to respond_to(:near)
       end
-      
+
       it "near method takes an optional max_meters parameter arguments" do
         expect((@place.method(:near).parameters.flatten - [:opt, :req]).count).to eq 1
         expect(@place.method(:near).parameters.flatten).to include(:opt)
-        expect(@place.method(:near).parameters.flatten).to_not include(:req)      
+        expect(@place.method(:near).parameters.flatten).to_not include(:req)
       end
 
       it "near returns expected type and result" do
@@ -103,7 +103,7 @@ feature "Module #3 Geolocation Tests" do
         ref_point = {:type=>"Point", :coordinates=>[-76.61666667, 39.33333333]}
         ref_distance = 1069.4 * 1000
         ref_list = []
-        Place.collection.find.each { |p| 
+        Place.collection.find.each { |p|
           if (Geo_utils.distance(p[:geometry][:geolocation], ref_point) <= ref_distance)
             ref_list.push(p)
           end
@@ -114,10 +114,10 @@ feature "Module #3 Geolocation Tests" do
         expect(list_near).to be_a Array
         expect(ref_list.count).to eq list_near.count
         id_list = ref_list.map{|e| e[:_id]}
-        list_near.each { |l| 
+        list_near.each { |l|
           expect(l).to be_a Place
           expect(id_list).to include(BSON::ObjectId.from_string(l.id))
-        }  
-      end    
-    end    
+        }
+      end
+    end
   end
