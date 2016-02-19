@@ -29,7 +29,14 @@ class Photo
 
   def save
     # save to GridFS
-    unless persisted?
+    if persisted?
+      photo_view = Photo.fs_bucket.find(_id: BSON::ObjectId.from_string(@id))
+      if @location
+        #NOTE assuming this is the one and only thing being
+        update_hash = { "metadata.location.coordinates": [@location.latitude, @location.longitude] }
+      end
+      photo_view.update_one(:$set => update_hash)
+    else
       description = {}
       file = @contents
       gps = EXIFR::JPEG.new(file).gps
@@ -48,7 +55,11 @@ class Photo
   def destroy
     grid_file = Photo.fs_bucket.find_one(_id: BSON::ObjectId.from_string(@id))
     Photo.fs_bucket.delete_one grid_file
-    # two = Photo.fs_bucket.find(_id: BSON::ObjectId.from_string(@id))
+  end
+
+  def find_nearest_place_id max_meters
+    nearest_id = Place.near(@location, max_meters)
+                      .limit(1).projection(_id: true).first[:_id]
     # binding.pry
   end
 
