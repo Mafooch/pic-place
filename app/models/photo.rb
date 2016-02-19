@@ -11,15 +11,19 @@ class Photo
   end
 
   def place
-    # binding.pry
     @place.nil? ? nil : Place.find(@place)
   end
 
   def place= place
-    if place.is_a? BSON::ObjectId
-      @place = place
-      # binding.pry
-    else
+    @place = case place
+    when BSON::ObjectId
+      place
+    when String
+      BSON::ObjectId.from_string place
+    when Place
+      BSON::ObjectId.from_string place.id
+    when nil
+      nil
     end
   end
 
@@ -45,13 +49,12 @@ class Photo
     # save to GridFS
     if persisted?
       photo_view = Photo.fs_bucket.find(_id: BSON::ObjectId.from_string(@id))
-      update_hash = {}
+      update_hash = { metadata: {} }
       if @location
-        update_hash = { "metadata.location.coordinates": [@location.latitude, @location.longitude] }
+        update_hash[:metadata][:location] =  { coordinates: [@location.longitude, @location.latitude] }
       end
-      if @place
-
-      end
+      update_hash[:metadata][:place] = @place
+      # you should be able to set the place to nil
       photo_view.update_one(:$set => update_hash)
     else
       description = {}
@@ -75,7 +78,6 @@ class Photo
   end
 
   def find_nearest_place_id max_meters
-    binding.pry
     nearest_id = Place.near(@location, max_meters)
                       .limit(1).projection(_id: true).first[:_id]
   end
