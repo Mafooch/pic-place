@@ -7,6 +7,20 @@ class Photo
     if params[:metadata] && params[:metadata][:location]
       @location = Point.new(params[:metadata][:location])
     end
+    @place = params[:metadata][:place] if params[:metadata] && params[:metadata][:place]
+  end
+
+  def place
+    # binding.pry
+    @place.nil? ? nil : Place.find(@place)
+  end
+
+  def place= place
+    if place.is_a? BSON::ObjectId
+      @place = place
+      # binding.pry
+    else
+    end
   end
 
   def contents
@@ -31,9 +45,12 @@ class Photo
     # save to GridFS
     if persisted?
       photo_view = Photo.fs_bucket.find(_id: BSON::ObjectId.from_string(@id))
+      update_hash = {}
       if @location
-        #NOTE assuming this is the one and only thing being
         update_hash = { "metadata.location.coordinates": [@location.latitude, @location.longitude] }
+      end
+      if @place
+
       end
       photo_view.update_one(:$set => update_hash)
     else
@@ -45,7 +62,7 @@ class Photo
       @location = Point.new lng: gps.longitude, lat: gps.latitude
       content_type = 'image/jpeg'
       description[:content_type] = content_type
-      description[:metadata] = { location: @location.to_hash }
+      description[:metadata] = { location: @location.to_hash, place: @place }
       grid_file = Mongo::Grid::File.new file.read, description
       grid_doc_id = Photo.fs_bucket.insert_one grid_file
       @id = grid_doc_id.to_s
@@ -58,9 +75,9 @@ class Photo
   end
 
   def find_nearest_place_id max_meters
+    binding.pry
     nearest_id = Place.near(@location, max_meters)
                       .limit(1).projection(_id: true).first[:_id]
-    # binding.pry
   end
 
   def self.mongo_client

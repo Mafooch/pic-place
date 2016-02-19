@@ -20,7 +20,7 @@ class Place
     Place.collection.find(_id: BSON::ObjectId.from_string(@id)).delete_one
     # TODO extract string id to bson away to a module in lib. a util module?
   end
-  
+
   def near max_meters = nil
     near_query_hash = { :$near => self.location.to_hash }
     near_query_hash[:$maxDistance] = max_meters if max_meters
@@ -101,8 +101,8 @@ class Place
   end
 
   def self.near point, max_meters = nil
-    near_query_hash = { :$near => point.to_hash }
+    near_query_hash = { :$geometry => point.to_hash }
     near_query_hash[:$maxDistance] = max_meters if max_meters
-    Place.collection.find "geometry.geolocation" => near_query_hash
+    Place.collection.find({ "geometry.geolocation" => { :$near => near_query_hash } })
   end
 end
