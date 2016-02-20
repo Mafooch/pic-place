@@ -28,6 +28,12 @@ class Place
     places_near = Place.to_places docs_near
   end
 
+  def photos offset = 0, limit = 0
+    place_bson_id = BSON::ObjectId.from_string @id
+    photo_docs = Photo.find_photos_for_place(place_bson_id).skip(offset).limit(limit)
+    photo_docs.map { |pd| Photo.new pd }
+  end
+
   def self.mongo_client
     Mongoid::Clients.default
   end
