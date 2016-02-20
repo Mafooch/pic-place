@@ -99,4 +99,9 @@ class Photo
     doc = fs_bucket.find(_id: BSON::ObjectId.from_string(id)).first
     doc.nil? ? nil : Photo.new(doc)
   end
+
+  def self.find_photos_for_place place_id
+    place_bson_id = BSON::ObjectId.from_string place_id
+    fs_bucket.find "metadata.place": place_bson_id
+  end
 end
