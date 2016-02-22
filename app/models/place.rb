@@ -1,4 +1,5 @@
 class Place
+  include ActiveModel::Model
   attr_accessor :id, :formatted_address, :location, :address_components
 
   def initialize params
@@ -32,6 +33,10 @@ class Place
     place_bson_id = BSON::ObjectId.from_string @id
     photo_docs = Photo.find_photos_for_place(place_bson_id).skip(offset).limit(limit)
     photo_docs.map { |pd| Photo.new pd }
+  end
+
+  def persisted?
+    !@id.nil?
   end
 
   def self.mongo_client
